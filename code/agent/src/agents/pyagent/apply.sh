@@ -16,6 +16,7 @@ cleanup()
 source ${DSTACK_HOME:-/var/lib/dstack}/common/scripts.sh
 
 DEST=$DSTACK_HOME/pyagent
+TOX_INI=$DEST/tox.ini
 MAIN=$DEST/main.py
 RESTART=$DEST/reboot
 OLD=$(mktemp -d ${DEST}.XXXXXXXX)
@@ -25,13 +26,39 @@ cd $(dirname $0)
 
 stage()
 {
-    cp -rf apply.sh dstack dist main.py $TEMP
+    if [ "$DSTACK_AGENT_TESTS" = "true" ]; then
+        cp -rf * $TEMP
+    else
+        cp -rf apply.sh dstack dist main.py $TEMP
+    fi
 
     if [ -e $DEST ]; then
         mv $DEST ${OLD}
     fi
     mv $TEMP ${DEST}
     rm -rf ${OLD}
+}
+
+conf()
+{
+    CONF=(/etc/dstack/agent/agent.conf
+          /var/lib/dstack/etc/dstack/agent/agent.conf)
+
+    for conf_file in "${CONF[@]}"; do
+        if [ -e $conf_file ]
+        then
+            source $conf_file
+        fi
+    done
+}
+
+run_tests()
+{
+    if [ "$DSTACK_AGENT_TESTS" != "true" ]; then
+        return 0
+    fi
+
+    tox -c $TOX_INI
 }
 
 start()
@@ -70,5 +97,7 @@ while [ "$#" -gt 0 ]; do
     shift 1
 done
 
+conf
 stage
+run_tests
 start

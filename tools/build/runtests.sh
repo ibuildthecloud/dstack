@@ -3,12 +3,26 @@ set -e
 
 trap cleanup EXIT
 
+BASE_DIR=$(dirname $0)
+
 cleanup()
 {
     if [ "$LASTPID" != "" ]
     then
         kill $LASTPID
     fi
+}
+
+before()
+{
+    (
+        cd $BASE_DIR
+        for i in runtests-before.d/*; do
+            if [ -x "$i" ]; then
+                ./$i
+            fi
+        done
+    )
 }
 
 PORT=8080
@@ -43,6 +57,8 @@ then
     echo "Server did not start"
     exit 1
 fi
+
+before
 
 cd tests/integration
 . ./env
