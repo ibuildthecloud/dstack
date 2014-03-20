@@ -73,7 +73,7 @@ public class ExtensionManagerImpl implements ExtensionManager, InitializationTas
     @Override
     public <T> List<T> getExtensionList(String key, Class<T> type) {
         Class<?> clz = keyToType.get(key);
-        if ( clz != null && clz != type ) {
+        if ( type != null && clz != null && clz != type ) {
             throw new IllegalArgumentException("Extension list for key [" + key + "] is of type ["
                     + type + "] got [" + clz + "]");
         }
@@ -302,7 +302,7 @@ public class ExtensionManagerImpl implements ExtensionManager, InitializationTas
 
     protected ExtensionPoint getExtensionPoint(String key) {
         List<ExtensionImplementation> impls = new ArrayList<ExtensionImplementation>();
-        ExtensionList<?> list = getExtensionListInternal(key);
+        List<?> list = getExtensionList(key, null);
 
         if ( list != null ) {
             for ( Object obj : list ) {
@@ -313,5 +313,9 @@ public class ExtensionManagerImpl implements ExtensionManager, InitializationTas
 
         return new ExtensionPointImpl(key, impls, getSettingValue(key + ".list"),
                 getSettingValue(key + ".exclude"), getSettingValue(key + ".include"));
+    }
+
+    protected Class<?> getExpectedType(String key) {
+        return keyToType.get(key);
     }
 }
