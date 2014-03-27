@@ -39,7 +39,7 @@ def test_docker_create_only(admin_client, docker_context):
                                           image.data.dockerImage.id)
     assert image.uuid == uuid
     assert image.data.dockerImage.repository == 'helloworld'
-    assert image.data.dockerImage.namespace == 'cattle'
+    assert image.data.dockerImage.namespace == 'ibuildthecloud'
     assert image.data.dockerImage.tag == 'latest'
     assert image.data.dockerImage.id is not None
 
